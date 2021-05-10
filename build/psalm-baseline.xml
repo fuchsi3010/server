@@ -1534,8 +1534,7 @@
       <code>$code</code>
       <code>Constants::PERMISSION_ALL</code>
     </InvalidScalarArgument>
-    <UndefinedClass occurrences="2">
-      <code>\OCA\Circles\Api\v1\Circles</code>
+    <UndefinedClass occurrences="1">
       <code>\OCA\Circles\Api\v1\Circles</code>
     </UndefinedClass>
     <UndefinedDocblockClass occurrences="4">
@@ -4528,9 +4527,6 @@
       <code>dispatch</code>
       <code>update</code>
     </TooManyArguments>
-    <UndefinedClass occurrences="1">
-      <code>\OCA\Circles\Api\v1\Circles</code>
-    </UndefinedClass>
     <UndefinedInterfaceMethod occurrences="1">
       <code>getChildren</code>
     </UndefinedInterfaceMethod>
