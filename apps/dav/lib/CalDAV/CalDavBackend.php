@@ -952,7 +952,6 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 			$qbDeleteCalendar = $this->db->getQueryBuilder();
 			$qbDeleteCalendarObjects->delete('calendars')
 				->where($qbDeleteCalendar->expr()->eq('id', $qbDeleteCalendar->createNamedParameter($calendarId)))
-
 				->executeStatement();
 
 			// Only dispatch if we actually deleted anything
@@ -1408,9 +1407,10 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 	 * @param mixed $calendarId
 	 * @param string $objectUri
 	 * @param int $calendarType
+	 * @param bool $forceDeletePermanently
 	 * @return void
 	 */
-	public function deleteCalendarObject($calendarId, $objectUri, $calendarType = self::CALENDAR_TYPE_CALENDAR) {
+	public function deleteCalendarObject($calendarId, $objectUri, $calendarType = self::CALENDAR_TYPE_CALENDAR, bool $forceDeletePermanently = false) {
 		$data = $this->getCalendarObject($calendarId, $objectUri, $calendarType);
 
 		if ($data === null) {
@@ -1418,7 +1418,7 @@ class CalDavBackend extends AbstractBackend implements SyncSupport, Subscription
 			return;
 		}
 
-		if ($this->config->getAppValue(Application::APP_ID, RetentionService::RETENTION_CONFIG_KEY) === '0') {
+		if ($forceDeletePermanently || $this->config->getAppValue(Application::APP_ID, RetentionService::RETENTION_CONFIG_KEY) === '0') {
 			$stmt = $this->db->prepare('DELETE FROM `*PREFIX*calendarobjects` WHERE `calendarid` = ? AND `uri` = ? AND `calendartype` = ?');
 			$stmt->execute([$calendarId, $objectUri, $calendarType]);
 

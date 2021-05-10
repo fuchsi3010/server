@@ -72,7 +72,8 @@ class RetentionService {
 			$this->calDavBackend->deleteCalendarObject(
 				$object['calendarid'],
 				$object['uri'],
-				$object['calendartype']
+				$object['calendartype'],
+				true
 			);
 		}
 	}

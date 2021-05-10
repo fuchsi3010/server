@@ -26,6 +26,7 @@ declare(strict_types=1);
 namespace OCA\DAV\Listener;
 
 use OCA\DAV\CalDAV\Activity\Backend as ActivityBackend;
+use OCA\DAV\DAV\Sharing\Plugin;
 use OCA\DAV\Events\CalendarCreatedEvent;
 use OCA\DAV\Events\CalendarDeletedEvent;
 use OCA\DAV\Events\CalendarMovedToTrashEvent;
@@ -123,7 +124,8 @@ class ActivityUpdaterListener implements IEventListener {
 			}
 		} elseif ($event instanceof CalendarDeletedEvent) {
 			try {
-				if (!isset($event->getCalendarData()['deleted_at'])) {
+				$deletedProp = '{' . Plugin::NS_NEXTCLOUD . '}deleted-at';
+				if (isset($event->getCalendarData()[$deletedProp])) {
 					$this->logger->debug(
 						sprintf('Calendar %d was already in trashbin, skipping deletion activity', $event->getCalendarId())
 					);
@@ -217,16 +219,23 @@ class ActivityUpdaterListener implements IEventListener {
 			}
 		} elseif ($event instanceof CalendarObjectDeletedEvent) {
 			try {
-				$this->activityBackend->onTouchCalendarObject(
-					\OCA\DAV\CalDAV\Activity\Provider\Event::SUBJECT_OBJECT_DELETE,
-					$event->getCalendarData(),
-					$event->getShares(),
-					$event->getObjectData()
-				);
+				$deletedProp = '{' . Plugin::NS_NEXTCLOUD . '}deleted-at';
+				if (isset($event->getObjectData()[$deletedProp])) {
+					$this->logger->debug(
+						sprintf('Calendar object in calendar %d was already in trashbin, skipping deletion activity', $event->getCalendarId())
+					);
+				} else {
+					$this->activityBackend->onTouchCalendarObject(
+						\OCA\DAV\CalDAV\Activity\Provider\Event::SUBJECT_OBJECT_DELETE,
+						$event->getCalendarData(),
+						$event->getShares(),
+						$event->getObjectData()
+					);
 
-				$this->logger->debug(
-					sprintf('Activity generated for deleted calendar object %d', $event->getCalendarId())
-				);
+					$this->logger->debug(
+						sprintf('Activity generated for deleted calendar object in calendar %d', $event->getCalendarId())
+					);
+				}
 			} catch (Throwable $e) {
 				// Any error with activities shouldn't abort the calendar deletion, so we just log it
 				$this->logger->error('Error generating activity for a deleted calendar object: ' . $e->getMessage(), [
